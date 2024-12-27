@@ -543,9 +543,9 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
-						return prompter.IndexFor(opts, "✓ cool commit, CI (trunk) Feb 23, 2021")
+						return prompter.IndexFor(opts, "✓ cool commit, CI [trunk] Feb 23, 2021")
 					})
 			},
 			opts: &ViewOptions{
@@ -593,9 +593,9 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
-						return prompter.IndexFor(opts, "✓ cool commit, CI (trunk) Feb 23, 2021")
+						return prompter.IndexFor(opts, "✓ cool commit, CI [trunk] Feb 23, 2021")
 					})
 				pm.RegisterSelect("View a specific job in this run?",
 					[]string{"View all jobs in this run", "✓ cool job", "X sad job"},
@@ -646,9 +646,9 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
-						return prompter.IndexFor(opts, "✓ cool commit, CI (trunk) Feb 23, 2021")
+						return prompter.IndexFor(opts, "✓ cool commit, CI [trunk] Feb 23, 2021")
 					})
 				pm.RegisterSelect("View a specific job in this run?",
 					[]string{"View all jobs in this run", "✓ cool job", "X sad job"},
@@ -743,9 +743,9 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
-						return prompter.IndexFor(opts, "✓ cool commit, CI (trunk) Feb 23, 2021")
+						return prompter.IndexFor(opts, "✓ cool commit, CI [trunk] Feb 23, 2021")
 					})
 				pm.RegisterSelect("View a specific job in this run?",
 					[]string{"View all jobs in this run", "✓ cool job", "X sad job"},
@@ -823,7 +823,7 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
 						return 4, nil
 					})
@@ -876,7 +876,7 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
 						return 4, nil
 					})
@@ -950,7 +950,7 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
 						return 4, nil
 					})
@@ -1104,9 +1104,9 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
-						return prompter.IndexFor(opts, "✓ cool commit, CI (trunk) Feb 23, 2021")
+						return prompter.IndexFor(opts, "✓ cool commit, CI [trunk] Feb 23, 2021")
 					})
 				pm.RegisterSelect("View a specific job in this run?",
 					[]string{"View all jobs in this run", "✓ cool job", "X sad job"},
@@ -1155,9 +1155,9 @@ func TestViewRun(t *testing.T) {
 			},
 			promptStubs: func(pm *prompter.MockPrompter) {
 				pm.RegisterSelect("Select a workflow run",
-					[]string{"X cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "✓ cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "- cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "* cool commit, CI (trunk) Feb 23, 2021", "X cool commit, CI (trunk) Feb 23, 2021"},
+					[]string{"X cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "✓ cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "- cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "* cool commit, CI [trunk] Feb 23, 2021", "X cool commit, CI [trunk] Feb 23, 2021"},
 					func(_, _ string, opts []string) (int, error) {
-						return prompter.IndexFor(opts, "✓ cool commit, CI (trunk) Feb 23, 2021")
+						return prompter.IndexFor(opts, "✓ cool commit, CI [trunk] Feb 23, 2021")
 					})
 				pm.RegisterSelect("View a specific job in this run?",
 					[]string{"View all jobs in this run", "✓ cool job", "X sad job"},
@@ -1183,7 +1183,7 @@ func TestViewRun(t *testing.T) {
 					httpmock.JSONResponse(shared.TestWorkflow))
 			},
 			browsedURL: "https://github.com/runs/3",
-			wantOut:    "Opening github.com/runs/3 in your browser.\n",
+			wantOut:    "Opening https://github.com/runs/3 in your browser.\n",
 		},
 		{
 			name: "web job",
@@ -1204,7 +1204,7 @@ func TestViewRun(t *testing.T) {
 					httpmock.JSONResponse(shared.TestWorkflow))
 			},
 			browsedURL: "https://github.com/jobs/10?check_suite_focus=true",
-			wantOut:    "Opening github.com/jobs/10 in your browser.\n",
+			wantOut:    "Opening https://github.com/jobs/10 in your browser.\n",
 		},
 		{
 			name: "hide job header, failure",
@@ -1521,6 +1521,18 @@ func Test_attachRunLog(t *testing.T) {
 			wantMatch: true,
 			// not the double space in the dir name, as the slash has been removed
 			wantFilename: "cool job  with slash/1_fob the barz.txt",
+		},
+		{
+			name: "job name with colon matches dir with colon removed",
+			job: shared.Job{
+				Name: "cool job : with colon",
+				Steps: []shared.Step{{
+					Name:   "fob the barz",
+					Number: 1,
+				}},
+			},
+			wantMatch:    true,
+			wantFilename: "cool job  with colon/1_fob the barz.txt",
 		},
 		{
 			name: "Job name with really long name (over the ZIP limit)",
