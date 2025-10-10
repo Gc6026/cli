@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Check if an issue is spam or not and output "PASS" (not spam) or "FAIL" (spam).
+# Performs spam detection on an issue and labels it if it's spam.
 #
 # Regardless of the spam detection result, the script always exits with a zero
 # exit code, unless there's a runtime error.
@@ -13,36 +13,32 @@ set -euo pipefail
 # This allows the script to be run from any directory.
 SPAM_DIR="$(dirname "$(realpath "$0")")"
 
-# Retrieve and prepare information about issue for detection
 _issue_url="$1"
 if [[ -z "$_issue_url" ]]; then
     echo "error: issue URL is empty" >&2
     exit 1
 fi
 
-_user_prompt_template='
-<TITLE>
-{{ .title }}
-</TITLE>
+_result="$("$SPAM_DIR/check-issue.sh" "$_issue_url")"
 
-<BODY>
-{{ .body }}
-</BODY>
-'
-
-_user_prompt="$(gh issue view --json title,body --template "$_user_prompt_template" "$_issue_url")"
-
-# Generate dynamic prompts for inference
-_system_prompt="$($SPAM_DIR/generate-sys-prompt.sh)"
-_final_prompt="$(_system="$_system_prompt" _user="$_user_prompt" yq eval ".messages[0].content = strenv(_system) | .messages[1].content = strenv(_user)" "$SPAM_DIR/check-issue-prompts.yml")"
-
-gh extension install github/gh-models 2>/dev/null
-
-_result="$(gh models run --file <(echo "$_final_prompt") | cat)"
-
-if [[ "$_result" != "PASS" && "$_result" != "FAIL" ]]; then
-    echo "error: expected PASS or FAIL but got an unexpected result: $_result" >&2
-    exit 1
+if [[ "$_result" == "PASS" ]]; then
+    echo "detected as not-spam: $_issue_url"
+    exit 0
 fi
 
-echo "$_result"
+echo "detected as spam: $_issue_url"
+
+cat << EOF | gh issue comment "$_issue_url" --body-file -
+Thank you for taking the time to create this issue.
+
+We've automatically reviewed this issue and suspect it as potentially inauthentic or spam-like content. As a result, we're closing this issue.
+
+**If this was closed by mistake**, please don't hesitate to reach out to us by commenting on this issue with additional context.
+
+We appreciate your understanding and apologize if this action was taken in error. Our automated systems help us manage the large volume of issues we receive, but we know they're not perfect.
+EOF
+
+gh issue edit --add-label "suspected-spam" --add-label "invalid" "$_issue_url"
+gh issue close "$_issue_url"
+
+echo "issue labelled as suspected spam"
