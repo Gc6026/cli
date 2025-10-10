@@ -31,8 +31,11 @@ type Options struct {
 	Repo                  string
 	SAN                   string
 	SANRegex              string
+	SignerDigest          string
 	SignerRepo            string
 	SignerWorkflow        string
+	SourceDigest          string
+	SourceRef             string
 	APIClient             api.Client
 	Logger                *io.Handler
 	OCIClient             oci.Client
@@ -48,6 +51,12 @@ func (opts *Options) Clean() {
 	if opts.BundlePath != "" {
 		opts.BundlePath = filepath.Clean(opts.BundlePath)
 	}
+}
+
+// FetchAttestationsFromGitHubAPI returns true if the command should fetch attestations from the GitHub API
+// It checks that a bundle path is not provided and that the "use bundle from registry" flag is not set
+func (opts *Options) FetchAttestationsFromGitHubAPI() bool {
+	return opts.BundlePath == "" && !opts.UseBundleFromRegistry
 }
 
 // AreFlagsValid checks that the provided flag combination is valid

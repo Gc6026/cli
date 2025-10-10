@@ -128,7 +128,7 @@ func NewCmdRun(f *cmdutil.Factory, runF func(*RunOptions) error) *cobra.Command 
 			return runRun(opts)
 		},
 	}
-	cmd.Flags().StringVarP(&opts.Ref, "ref", "r", "", "The branch or tag name which contains the version of the workflow file you'd like to run")
+	cmd.Flags().StringVarP(&opts.Ref, "ref", "r", "", "Branch or tag name which contains the version of the workflow file you'd like to run")
 	cmd.Flags().StringArrayVarP(&opts.MagicFields, "field", "F", nil, "Add a string parameter in `key=value` format, respecting @ syntax (see \"gh help api\").")
 	cmd.Flags().StringArrayVarP(&opts.RawFields, "raw-field", "f", nil, "Add a string parameter in `key=value` format")
 	cmd.Flags().BoolVar(&opts.JSON, "json", false, "Read workflow inputs as JSON via STDIN")
@@ -330,7 +330,7 @@ func runRun(opts *RunOptions) error {
 		fmt.Fprintln(out)
 
 		fmt.Fprintf(out, "To see runs for this workflow, try: %s\n",
-			cs.Boldf("gh run list --workflow=%s", workflow.Base()))
+			cs.Boldf("gh run list --workflow=%q", workflow.Base()))
 	}
 
 	return nil

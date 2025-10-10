@@ -56,7 +56,7 @@ func newEnforcementCriteria(opts *Options) (verification.EnforcementCriteria, er
 		signedRepoRegex := expandToGitHubURLRegex(opts.Tenant, opts.SignerRepo)
 		c.SANRegex = signedRepoRegex
 	} else if opts.SignerWorkflow != "" {
-		validatedWorkflowRegex, err := validateSignerWorkflow(opts)
+		validatedWorkflowRegex, err := validateSignerWorkflow(opts.Hostname, opts.SignerWorkflow)
 		if err != nil {
 			return verification.EnforcementCriteria{}, err
 		}
@@ -66,7 +66,7 @@ func newEnforcementCriteria(opts *Options) (verification.EnforcementCriteria, er
 		// then we default to the repo option
 		c.SANRegex = expandToGitHubURLRegex(opts.Tenant, opts.Repo)
 	} else {
-		// if opts.Repo was not provided, we fallback to the opts.Owner value
+		// if opts.Repo was not provided, we fall back to the opts.Owner value
 		c.SANRegex = expandToGitHubURLRegex(opts.Tenant, owner)
 	}
 
@@ -97,6 +97,12 @@ func newEnforcementCriteria(opts *Options) (verification.EnforcementCriteria, er
 		// otherwise use the custom OIDC issuer provided as an option
 		c.Certificate.Issuer = opts.OIDCIssuer
 	}
+
+	// set the SourceRepositoryDigest, SourceRepositoryRef, and BuildSignerDigest
+	// extensions if the options are provided
+	c.Certificate.BuildSignerDigest = opts.SignerDigest
+	c.Certificate.SourceRepositoryDigest = opts.SourceDigest
+	c.Certificate.SourceRepositoryRef = opts.SourceRef
 
 	return c, nil
 }
@@ -140,23 +146,23 @@ func buildSigstoreVerifyPolicy(c verification.EnforcementCriteria, a artifact.Di
 	return policy, nil
 }
 
-func validateSignerWorkflow(opts *Options) (string, error) {
+func validateSignerWorkflow(hostname, signerWorkflow string) (string, error) {
 	// we expect a provided workflow argument be in the format [HOST/]/<OWNER>/<REPO>/path/to/workflow.yml
 	// if the provided workflow does not contain a host, set the host
-	match, err := regexp.MatchString(hostRegex, opts.SignerWorkflow)
+	match, err := regexp.MatchString(hostRegex, signerWorkflow)
 	if err != nil {
 		return "", err
 	}
 
 	if match {
-		return fmt.Sprintf("^https://%s", opts.SignerWorkflow), nil
+		return fmt.Sprintf("^https://%s", signerWorkflow), nil
 	}
 
 	// if the provided workflow did not match the expect format
 	// we move onto creating a signer workflow using the provided host name
-	if opts.Hostname == "" {
-		return "", errors.New("unknown host")
+	if hostname == "" {
+		return "", errors.New("unknown signer workflow host")
 	}
 
-	return fmt.Sprintf("^https://%s/%s", opts.Hostname, opts.SignerWorkflow), nil
+	return fmt.Sprintf("^https://%s/%s", hostname, signerWorkflow), nil
 }

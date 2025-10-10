@@ -38,6 +38,7 @@ type LoginOptions struct {
 	GitProtocol      string
 	InsecureStorage  bool
 	SkipSSHKeyPrompt bool
+	Clipboard        bool
 }
 
 func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Command {
@@ -68,8 +69,11 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 			to writing the token to a plain text file. See %[1]sgh auth status%[1]s for its
 			stored location.
 
-			Alternatively, use %[1]s--with-token%[1]s to pass in a token on standard input.
+			Alternatively, use %[1]s--with-token%[1]s to pass in a personal access token (classic) on standard input.
 			The minimum required scopes for the token are: %[1]srepo%[1]s, %[1]sread:org%[1]s, and %[1]sgist%[1]s.
+			Take care when passing a fine-grained personal access token to %[1]s--with-token%[1]s
+			as the inherent scoping to certain resources may cause confusing behaviour when interacting with other
+			resources. Favour setting %[1]sGH_TOKEN%[1]s for fine-grained personal access token usage.
 
 			Alternatively, gh will use the authentication token found in environment variables.
 			This method is most suitable for "headless" use of gh such as in automation. See
@@ -85,11 +89,15 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 			prompting to create and upload a new key if one is not found. This can be skipped with
 			%[1]s--skip-ssh-key%[1]s flag.
 
-			For more information on OAuth scopes, <https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps/>.
+			For more information on OAuth scopes, see
+			<https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps/>.
 		`, "`"),
 		Example: heredoc.Doc(`
 			# Start interactive setup
 			$ gh auth login
+
+			# Open a browser to authenticate and copy one-time OAuth code to clipboard
+			$ gh auth login --web --clipboard
 
 			# Authenticate against github.com by reading the token from a file
 			$ gh auth login --with-token < mytoken.txt
@@ -141,6 +149,7 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 	cmd.Flags().StringSliceVarP(&opts.Scopes, "scopes", "s", nil, "Additional authentication scopes to request")
 	cmd.Flags().BoolVar(&tokenStdin, "with-token", false, "Read token from standard input")
 	cmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "Open a browser to authenticate")
+	cmd.Flags().BoolVarP(&opts.Clipboard, "clipboard", "c", false, "Copy one-time OAuth device code to clipboard")
 	cmdutil.StringEnumFlag(cmd, &opts.GitProtocol, "git-protocol", "p", "", []string{"ssh", "https"}, "The protocol to use for git operations on this host")
 
 	// secure storage became the default on 2023/4/04; this flag is left as a no-op for backwards compatibility
@@ -223,6 +232,7 @@ func loginRun(opts *LoginOptions) error {
 		},
 		SecureStorage:    !opts.InsecureStorage,
 		SkipSSHKeyPrompt: opts.SkipSSHKeyPrompt,
+		CopyToClipboard:  opts.Clipboard,
 	})
 }
 

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"time"
 
 	"github.com/cli/cli/v2/api"
@@ -19,6 +20,7 @@ import (
 	"github.com/cli/cli/v2/pkg/cmd/extension"
 	"github.com/cli/cli/v2/pkg/cmdutil"
 	"github.com/cli/cli/v2/pkg/iostreams"
+	xcolor "github.com/cli/go-gh/v2/pkg/x/color"
 )
 
 var ssoHeader string
@@ -117,7 +119,7 @@ func BaseRepoFunc(f *cmdutil.Factory) func() (ghrepo.Interface, error) {
 // even more confusion because the API requests can be different, and FURTHERMORE this can be an issue for
 // services that don't handle renames correctly, like the ElasticSearch indexing.
 //
-// Assuming we have an interactive invocation, then the next step is to resolve a network of respositories. This
+// Assuming we have an interactive invocation, then the next step is to resolve a network of repositories. This
 // involves creating a dynamic GQL query requesting information about each repository (up to a limit of 5).
 // Each returned repo is added to a list, along with its parent, if present in the query response.
 // The repositories in the query retain the same ordering as previously outlined. Interestingly, the request is sent
@@ -225,7 +227,7 @@ func newBrowser(f *cmdutil.Factory) browser.Browser {
 func newPrompter(f *cmdutil.Factory) prompter.Prompter {
 	editor, _ := cmdutil.DetermineEditor(f.Config)
 	io := f.IOStreams
-	return prompter.New(editor, io.In, io.Out, io.ErrOut)
+	return prompter.New(editor, io)
 }
 
 func configFunc() func() (gh.Config, error) {
@@ -282,6 +284,26 @@ func ioStreams(f *cmdutil.Factory) *iostreams.IOStreams {
 		io.SetNeverPrompt(true)
 	}
 
+	falseyValues := []string{"false", "0", "no", ""}
+
+	accessiblePrompterValue, accessiblePrompterIsSet := os.LookupEnv("GH_ACCESSIBLE_PROMPTER")
+	if accessiblePrompterIsSet {
+		if !slices.Contains(falseyValues, accessiblePrompterValue) {
+			io.SetAccessiblePrompterEnabled(true)
+		}
+	} else if prompt := cfg.AccessiblePrompter(""); prompt.Value == "enabled" {
+		io.SetAccessiblePrompterEnabled(true)
+	}
+
+	ghSpinnerDisabledValue, ghSpinnerDisabledIsSet := os.LookupEnv("GH_SPINNER_DISABLED")
+	if ghSpinnerDisabledIsSet {
+		if !slices.Contains(falseyValues, ghSpinnerDisabledValue) {
+			io.SetSpinnerDisabled(true)
+		}
+	} else if spinnerDisabled := cfg.Spinner(""); spinnerDisabled.Value == "disabled" {
+		io.SetSpinnerDisabled(true)
+	}
+
 	// Pager precedence
 	// 1. GH_PAGER
 	// 2. pager from config
@@ -291,6 +313,19 @@ func ioStreams(f *cmdutil.Factory) *iostreams.IOStreams {
 	} else if pager := cfg.Pager(""); pager.Value != "" {
 		io.SetPager(pager.Value)
 	}
+
+	if ghColorLabels, ghColorLabelsExists := os.LookupEnv("GH_COLOR_LABELS"); ghColorLabelsExists {
+		switch ghColorLabels {
+		case "", "0", "false", "no":
+			io.SetColorLabels(false)
+		default:
+			io.SetColorLabels(true)
+		}
+	} else if prompt := cfg.ColorLabels(""); prompt.Value == "enabled" {
+		io.SetColorLabels(true)
+	}
+
+	io.SetAccessibleColorsEnabled(xcolor.IsAccessibleColorsEnabled())
 
 	return io
 }

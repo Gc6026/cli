@@ -41,16 +41,28 @@ func NewCmdDelete(f *cmdutil.Factory, runF func(*DeleteOptions) error) *cobra.Co
 		Short: "Delete a repository",
 		Long: heredoc.Docf(`
 			Delete a GitHub repository.
-			
-			With no argument, deletes the current repository. Otherwise, deletes the specified repository.
 
-			Deletion requires authorization with the %[1]sdelete_repo%[1]s scope. 
+			With no argument, deletes the current repository. Otherwise, deletes the specified repository.
+			
+			For safety, when no repository argument is provided, the %[1]s--yes%[1]s flag is ignored 
+			and you will be prompted for confirmation. To delete the current repository non-interactively, 
+			specify it explicitly (e.g., %[1]sgh repo delete owner/repo --yes%[1]s).
+
+			Deletion requires authorization with the %[1]sdelete_repo%[1]s scope.
 			To authorize, run %[1]sgh auth refresh -s delete_repo%[1]s
 		`, "`"),
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				opts.RepoArg = args[0]
+			}
+
+			// Ignore --yes when no argument provided to prevent accidental deletion
+			if len(args) == 0 && opts.Confirmed {
+				if !opts.IO.CanPrompt() {
+					return cmdutil.FlagErrorf("cannot non-interactively delete current repository. Please specify a repository or run interactively")
+				}
+				opts.Confirmed = false
 			}
 
 			if !opts.IO.CanPrompt() && !opts.Confirmed {
@@ -65,9 +77,9 @@ func NewCmdDelete(f *cmdutil.Factory, runF func(*DeleteOptions) error) *cobra.Co
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.Confirmed, "confirm", false, "confirm deletion without prompting")
+	cmd.Flags().BoolVar(&opts.Confirmed, "confirm", false, "Confirm deletion without prompting")
 	_ = cmd.Flags().MarkDeprecated("confirm", "use `--yes` instead")
-	cmd.Flags().BoolVar(&opts.Confirmed, "yes", false, "confirm deletion without prompting")
+	cmd.Flags().BoolVar(&opts.Confirmed, "yes", false, "Confirm deletion without prompting")
 	return cmd
 }
 

@@ -52,12 +52,9 @@ func (c EnforcementCriteria) Valid() error {
 }
 
 func (c EnforcementCriteria) BuildPolicyInformation() string {
-	policyAttr := make([][]string, 0, 6)
+	policyAttr := [][]string{}
 
-	policyAttr = appendStr(policyAttr, "- OIDC Issuer must match", c.Certificate.Issuer)
-	if c.Certificate.RunnerEnvironment == GitHubRunner {
-		policyAttr = appendStr(policyAttr, "- Action workflow Runner Environment must match ", GitHubRunner)
-	}
+	policyAttr = appendStr(policyAttr, "- Predicate type must match", c.PredicateType)
 
 	policyAttr = appendStr(policyAttr, "- Source Repository Owner URI must match", c.Certificate.SourceRepositoryOwnerURI)
 
@@ -65,12 +62,25 @@ func (c EnforcementCriteria) BuildPolicyInformation() string {
 		policyAttr = appendStr(policyAttr, "- Source Repository URI must match", c.Certificate.SourceRepositoryURI)
 	}
 
-	policyAttr = appendStr(policyAttr, "- Predicate type must match", c.PredicateType)
+	if c.Certificate.BuildSignerDigest != "" {
+		policyAttr = appendStr(policyAttr, "- Build signer digest must match", c.Certificate.BuildSignerDigest)
+	}
+	if c.Certificate.SourceRepositoryDigest != "" {
+		policyAttr = appendStr(policyAttr, "- Source repo digest digest must match", c.Certificate.SourceRepositoryDigest)
+	}
+	if c.Certificate.SourceRepositoryRef != "" {
+		policyAttr = appendStr(policyAttr, "- Source repo ref must match", c.Certificate.SourceRepositoryRef)
+	}
 
 	if c.SAN != "" {
 		policyAttr = appendStr(policyAttr, "- Subject Alternative Name must match", c.SAN)
 	} else if c.SANRegex != "" {
 		policyAttr = appendStr(policyAttr, "- Subject Alternative Name must match regex", c.SANRegex)
+	}
+
+	policyAttr = appendStr(policyAttr, "- OIDC Issuer must match", c.Certificate.Issuer)
+	if c.Certificate.RunnerEnvironment == GitHubRunner {
+		policyAttr = appendStr(policyAttr, "- Action workflow Runner Environment must match ", GitHubRunner)
 	}
 
 	maxColLen := 0

@@ -1234,6 +1234,35 @@ func Test_apiRun_DELETE(t *testing.T) {
 	}
 }
 
+func Test_apiRun_HEAD(t *testing.T) {
+	ios, _, _, _ := iostreams.Test()
+
+	err := apiRun(&ApiOptions{
+		IO: ios,
+		Config: func() (gh.Config, error) {
+			return config.NewBlankConfig(), nil
+		},
+		HttpClient: func() (*http.Client, error) {
+			var tr roundTripper = func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: 422,
+					Request:    req,
+					Header: map[string][]string{
+						"Content-Type": {"application/json"},
+					}}, nil
+			}
+			return &http.Client{Transport: tr}, nil
+		},
+		MagicFields:         []string(nil),
+		RawFields:           []string(nil),
+		RequestMethod:       "HEAD",
+		RequestMethodPassed: true,
+	})
+	if err != cmdutil.SilentError {
+		t.Fatalf("got error %v", err)
+	}
+}
+
 func Test_apiRun_inputFile(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -1329,7 +1358,12 @@ func Test_apiRun_cache(t *testing.T) {
 		Config: func() (gh.Config, error) {
 			return &ghmock.ConfigMock{
 				AuthenticationFunc: func() gh.AuthConfig {
-					return &config.AuthConfig{}
+					cfg := &config.AuthConfig{}
+					// Required because the http client tries to get the active token and otherwise
+					// this goes down to to go-gh config and panics. Pretty bad solution, it would
+					// be better if this were black box.
+					cfg.SetActiveToken("token", "stub")
+					return cfg
 				},
 				// Cached responses are stored in a tempdir that gets automatically cleaned up
 				CacheDirFunc: func() string {

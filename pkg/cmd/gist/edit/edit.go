@@ -108,15 +108,20 @@ func editRun(opts *EditOptions) error {
 	if gistID == "" {
 		cs := opts.IO.ColorScheme()
 		if gistID == "" {
-			gistID, err = shared.PromptGists(opts.Prompter, client, host, cs)
+			if !opts.IO.CanPrompt() {
+				return cmdutil.FlagErrorf("gist ID or URL required when not running interactively")
+			}
+
+			gist, err := shared.PromptGists(opts.Prompter, client, host, cs)
 			if err != nil {
 				return err
 			}
 
-			if gistID == "" {
+			if gist.ID == "" {
 				fmt.Fprintln(opts.IO.Out, "No gists found.")
 				return nil
 			}
+			gistID = gist.ID
 		}
 	}
 
@@ -231,6 +236,8 @@ func editRun(opts *EditOptions) error {
 		if filename == "" {
 			if len(candidates) == 1 {
 				filename = candidates[0]
+			} else if len(candidates) == 0 {
+				return errors.New("no file in the gist")
 			} else {
 				if !opts.IO.CanPrompt() {
 					return errors.New("unsure what file to edit; either specify --filename or run interactively")

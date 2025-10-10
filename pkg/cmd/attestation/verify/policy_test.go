@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/cli/cli/v2/pkg/cmd/attestation/verification"
-	"github.com/cli/cli/v2/pkg/cmd/factory"
 
 	"github.com/stretchr/testify/require"
 )
@@ -217,6 +216,48 @@ func TestNewEnforcementCriteria(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "https://foo.com", c.Certificate.Issuer)
 	})
+
+	t.Run("sets Certificate.BuildSignerDigest using opts.SignerDigest", func(t *testing.T) {
+		opts := &Options{
+			ArtifactPath: artifactPath,
+			Owner:        "wrong",
+			Repo:         "wrong/value",
+			SignerDigest: "foo",
+			Hostname:     "github.com",
+		}
+
+		c, err := newEnforcementCriteria(opts)
+		require.NoError(t, err)
+		require.Equal(t, "foo", c.Certificate.BuildSignerDigest)
+	})
+
+	t.Run("sets Certificate.SourceRepositoryDigest using opts.SourceDigest", func(t *testing.T) {
+		opts := &Options{
+			ArtifactPath: artifactPath,
+			Owner:        "wrong",
+			Repo:         "wrong/value",
+			SourceDigest: "foo",
+			Hostname:     "github.com",
+		}
+
+		c, err := newEnforcementCriteria(opts)
+		require.NoError(t, err)
+		require.Equal(t, "foo", c.Certificate.SourceRepositoryDigest)
+	})
+
+	t.Run("sets Certificate.SourceRepositoryRef using opts.SourceRef", func(t *testing.T) {
+		opts := &Options{
+			ArtifactPath: artifactPath,
+			Owner:        "wrong",
+			Repo:         "wrong/value",
+			SourceRef:    "refs/heads/main",
+			Hostname:     "github.com",
+		}
+
+		c, err := newEnforcementCriteria(opts)
+		require.NoError(t, err)
+		require.Equal(t, "refs/heads/main", c.Certificate.SourceRepositoryRef)
+	})
 }
 
 func TestValidateSignerWorkflow(t *testing.T) {
@@ -234,7 +275,7 @@ func TestValidateSignerWorkflow(t *testing.T) {
 			name:                   "workflow with no host specified",
 			providedSignerWorkflow: "github/artifact-attestations-workflows/.github/workflows/attest.yml",
 			expectErr:              true,
-			errContains:            "unknown host",
+			errContains:            "unknown signer workflow host",
 		},
 		{
 			name:                   "workflow with default host",
@@ -263,14 +304,8 @@ func TestValidateSignerWorkflow(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		opts := &Options{
-			Config:         factory.New("test").Config,
-			SignerWorkflow: tc.providedSignerWorkflow,
-		}
-
 		// All host resolution is done verify.go:RunE
-		opts.Hostname = tc.host
-		workflowRegex, err := validateSignerWorkflow(opts)
+		workflowRegex, err := validateSignerWorkflow(tc.host, tc.providedSignerWorkflow)
 		require.Equal(t, tc.expectedWorkflowRegex, workflowRegex)
 
 		if tc.expectErr {

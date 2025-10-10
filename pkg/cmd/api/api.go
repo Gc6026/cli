@@ -85,6 +85,13 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			any value that contains %[1]s{...}%[1]s in quotes to prevent the shell from
 			applying special meaning to curly braces.
 
+			The %[1]s-p/--preview%[1]s flag enables opting into previews, which are feature-flagged,
+			experimental API endpoints or behaviors. The API expects opt-in via the %[1]sAccept%[1]s
+			header with format %[1]sapplication/vnd.github.<preview-name>-preview+json%[1]s and this
+			command facilitates that via %[1]s--preview <preview-name>%[1]s. To send a request for
+			the corsair and scarlet witch previews, you could use %[1]s-p corsair,scarlet-witch%[1]s
+			or %[1]s--preview corsair --preview scarlet-witch%[1]s.
+
 			The default HTTP request method is %[1]sGET%[1]s normally and %[1]sPOST%[1]s if any parameters
 			were added. Override the method with %[1]s--method%[1]s.
 
@@ -124,39 +131,39 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			into an outer JSON array.
 		`, "`"),
 		Example: heredoc.Doc(`
-			# list releases in the current repository
+			# List releases in the current repository
 			$ gh api repos/{owner}/{repo}/releases
 
-			# post an issue comment
+			# Post an issue comment
 			$ gh api repos/{owner}/{repo}/issues/123/comments -f body='Hi from CLI'
 
-			# post nested parameter read from a file
+			# Post nested parameter read from a file
 			$ gh api gists -F 'files[myfile.txt][content]=@myfile.txt'
 
-			# add parameters to a GET request
+			# Add parameters to a GET request
 			$ gh api -X GET search/issues -f q='repo:cli/cli is:open remote'
 
-			# set a custom HTTP header
+			# Set a custom HTTP header
 			$ gh api -H 'Accept: application/vnd.github.v3.raw+json' ...
 
-			# opt into GitHub API previews
+			# Opt into GitHub API previews
 			$ gh api --preview baptiste,nebula ...
 
-			# print only specific fields from the response
+			# Print only specific fields from the response
 			$ gh api repos/{owner}/{repo}/issues --jq '.[].title'
 
-			# use a template for the output
+			# Use a template for the output
 			$ gh api repos/{owner}/{repo}/issues --template \
 			  '{{range .}}{{.title}} ({{.labels | pluck "name" | join ", " | color "yellow"}}){{"\n"}}{{end}}'
 
-			# update allowed values of the "environment" custom property in a deeply nested array
-			gh api -X PATCH /orgs/{org}/properties/schema \
+			# Update allowed values of the "environment" custom property in a deeply nested array
+			$ gh api -X PATCH /orgs/{org}/properties/schema \
 			   -F 'properties[][property_name]=environment' \
 			   -F 'properties[][default_value]=production' \
 			   -F 'properties[][allowed_values][]=staging' \
 			   -F 'properties[][allowed_values][]=production'
 
-			# list releases with GraphQL
+			# List releases with GraphQL
 			$ gh api graphql -F owner='{owner}' -F name='{repo}' -f query='
 			  query($name: String!, $owner: String!) {
 			    repository(owner: $owner, name: $name) {
@@ -167,7 +174,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			  }
 			'
 
-			# list all repositories for a user
+			# List all repositories for a user
 			$ gh api graphql --paginate -f query='
 			  query($endCursor: String) {
 			    viewer {
@@ -182,7 +189,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			  }
 			'
 
-			# get the percentage of forks for the current user
+			# Get the percentage of forks for the current user
 			$ gh api graphql --paginate --slurp -f query='
 			  query($endCursor: String) {
 			    viewer {
@@ -199,15 +206,15 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			[.[].data.viewer.repositories.nodes[]] as $r | count(select($r[].isFork))/count($r[])'
 		`),
 		Annotations: map[string]string{
-			"help:environment": heredoc.Doc(`
+			"help:environment": heredoc.Docf(`
 				GH_TOKEN, GITHUB_TOKEN (in order of precedence): an authentication token for
-				github.com API requests.
+				%[1]sgithub.com%[1]s API requests.
 
 				GH_ENTERPRISE_TOKEN, GITHUB_ENTERPRISE_TOKEN (in order of precedence): an
 				authentication token for API requests to GitHub Enterprise.
 
-				GH_HOST: make the request to a GitHub host other than github.com.
-			`),
+				GH_HOST: make the request to a GitHub host other than %[1]sgithub.com%[1]s.
+			`, "`"),
 		},
 		Args: cobra.ExactArgs(1),
 		PreRun: func(c *cobra.Command, args []string) {
@@ -239,17 +246,19 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 				return err
 			}
 
-			if opts.Slurp && !opts.Paginate {
-				return cmdutil.FlagErrorf("`--paginate` required when passing `--slurp`")
-			}
+			if opts.Slurp {
+				if err := cmdutil.MutuallyExclusive(
+					"the `--slurp` option is not supported with `--jq` or `--template`",
+					opts.Slurp,
+					opts.FilterOutput != "",
+					opts.Template != "",
+				); err != nil {
+					return err
+				}
 
-			if err := cmdutil.MutuallyExclusive(
-				"the `--slurp` option is not supported with `--jq` or `--template`",
-				opts.Slurp,
-				opts.FilterOutput != "",
-				opts.Template != "",
-			); err != nil {
-				return err
+				if !opts.Paginate {
+					return cmdutil.FlagErrorf("`--paginate` required when passing `--slurp`")
+				}
 			}
 
 			if err := cmdutil.MutuallyExclusive(
@@ -274,7 +283,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 	cmd.Flags().StringArrayVarP(&opts.MagicFields, "field", "F", nil, "Add a typed parameter in `key=value` format")
 	cmd.Flags().StringArrayVarP(&opts.RawFields, "raw-field", "f", nil, "Add a string parameter in `key=value` format")
 	cmd.Flags().StringArrayVarP(&opts.RequestHeaders, "header", "H", nil, "Add a HTTP request header in `key:value` format")
-	cmd.Flags().StringSliceVarP(&opts.Previews, "preview", "p", nil, "GitHub API preview `names` to request (without the \"-preview\" suffix)")
+	cmd.Flags().StringSliceVarP(&opts.Previews, "preview", "p", nil, "Opt into GitHub API previews (names should omit '-preview')")
 	cmd.Flags().BoolVarP(&opts.ShowResponseHeaders, "include", "i", false, "Include HTTP response status line and headers in the output")
 	cmd.Flags().BoolVar(&opts.Slurp, "slurp", false, "Use with \"--paginate\" to return an array of all pages of either JSON arrays or objects")
 	cmd.Flags().BoolVar(&opts.Paginate, "paginate", false, "Make additional HTTP requests to fetch all pages of results")
@@ -461,9 +470,11 @@ func processResponse(resp *http.Response, opts *ApiOptions, bodyWriter, headersW
 
 	var serverError string
 	if isJSON && (opts.RequestPath == "graphql" || resp.StatusCode >= 400) {
-		responseBody, serverError, err = parseErrorResponse(responseBody, resp.StatusCode)
-		if err != nil {
-			return
+		if !strings.EqualFold(opts.RequestMethod, "HEAD") {
+			responseBody, serverError, err = parseErrorResponse(responseBody, resp.StatusCode)
+			if err != nil {
+				return
+			}
 		}
 	}
 
